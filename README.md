@@ -1,3 +1,2 @@
 # Report-send-arp
-falsify Sender(Victim)'s ARP table</br>
-code refactoring 예정
+falsify Sender(Victim)'s ARP table
