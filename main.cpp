@@ -85,6 +85,7 @@ void usage() {
 
 
 int main(int argc, char* argv[]) {
+	// 인자를 여러개 받는 것은 구현 못했음
 	if (argc < 4 || (argc % 2) != 0) {
 		usage();
 		return -1;
@@ -122,7 +123,7 @@ int main(int argc, char* argv[]) {
 
 	char target_mac[ETH_ALEN];
 
-
+// Victim MAC주소 받아오는 ARP
 	packet.eth_.dmac_ = Mac("ff:ff:ff:ff:ff:ff");
 	packet.eth_.smac_ = Mac(my_mac);
 	packet.eth_.type_ = htons(EthHdr::Arp);
@@ -153,7 +154,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-// arp-send
+// Gateway arp-send
 	packet.eth_.dmac_ = Mac(target_mac);
 	packet.eth_.smac_ = Mac(my_mac);
 	packet.eth_.type_ = htons(EthHdr::Arp);
