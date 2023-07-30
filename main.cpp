@@ -72,7 +72,6 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res1, pcap_geterr(handle));
 		}
 		char dst_mac[ETH_ALEN];
-		const int TIMEOUT_MS = 3000;
 
 		// Receiving reply packet and extract victim's MAC address
 		while (true)
