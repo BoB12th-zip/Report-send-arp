@@ -32,6 +32,7 @@ int getMACAddress(const char *interfaceName, unsigned char *macAddress)
 	return 0;
 }
 
+
 int getIPAddress(const char *interfaceName, char *ipAddress)
 {
 	int sockfd;
@@ -57,11 +58,10 @@ int getIPAddress(const char *interfaceName, char *ipAddress)
 		return -1;
 	}
 
-	// IP 주소 문자열로 변환
+	// IP 주소 복사
 	struct sockaddr_in *addr_in = (struct sockaddr_in *)&ifr.ifr_addr;
 	const char *ip = inet_ntoa(addr_in->sin_addr);
-	strncpy(ipAddress, ip, INET_ADDRSTRLEN - 1);
-	ipAddress[INET_ADDRSTRLEN - 1] = '\0';
+	memcpy(ipAddress, ip, 16);
 
 	close(sockfd);
 	return 0;

