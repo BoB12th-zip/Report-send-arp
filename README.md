@@ -1,5 +1,5 @@
 # Report-send-arp
-falsify Sender(Victim)'s ARP table
+infect Sender(Victim)'s ARP table
 ```
 syntax : send-arp [<sender ip 2> <target ip 2> ...] sample : send-arp wlan0 192.168.10.2 192.168.10.1
 ```
