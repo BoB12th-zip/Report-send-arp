@@ -1,6 +1,6 @@
 #include "getAddress.h"
 
-int getMACAddress(const char *interfaceName, unsigned char *macAddress)
+bool getHostMacAddress(const char *interfaceName, Mac* macAddress)
 {
 	int sockfd;
 	struct ifreq ifr;
@@ -9,8 +9,8 @@ int getMACAddress(const char *interfaceName, unsigned char *macAddress)
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sockfd < 0)
 	{
-		perror("socket");
-		return -1;
+		printf("[ERR] socket error\n");
+		return false;
 	}
 
 	// 인터페이스 이름 설정
@@ -20,20 +20,21 @@ int getMACAddress(const char *interfaceName, unsigned char *macAddress)
 	// MAC 주소 가져오기
 	if (ioctl(sockfd, SIOCGIFHWADDR, &ifr) == -1)
 	{
-		perror("ioctl");
+		printf("[ERR] ioctl error\n");
 		close(sockfd);
 		return -1;
 	}
 
 	// MAC 주소 복사
-	memcpy(macAddress, ifr.ifr_hwaddr.sa_data, 6);
+	// memcpy(macAddress, ifr.ifr_hwaddr.sa_data, 6);
+	*macAddress = (uint8_t *)(ifr.ifr_hwaddr.sa_data);
 
+	printf("[+] attackerMac  : %s\n", std::string(*macAddress).c_str());
 	close(sockfd);
-	return 0;
+	return true;
 }
 
-
-int getIPAddress(const char *interfaceName, char *ipAddress)
+bool getHostIpAddress(const char *interfaceName, Ip* ipAddress)
 {
 	int sockfd;
 	struct ifreq ifr;
@@ -42,8 +43,8 @@ int getIPAddress(const char *interfaceName, char *ipAddress)
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sockfd < 0)
 	{
-		perror("socket");
-		return -1;
+		printf("[ERR] socket error\n");
+		return false;
 	}
 
 	// 인터페이스 이름 설정
@@ -53,16 +54,27 @@ int getIPAddress(const char *interfaceName, char *ipAddress)
 	// IP 주소 가져오기
 	if (ioctl(sockfd, SIOCGIFADDR, &ifr) == -1)
 	{
-		perror("ioctl");
+		printf("[ERR] ioctl error\n");
 		close(sockfd);
-		return -1;
+		return false;
 	}
 
 	// IP 주소 복사
-	struct sockaddr_in *addr_in = (struct sockaddr_in *)&ifr.ifr_addr;
-	const char *ip = inet_ntoa(addr_in->sin_addr);
-	memcpy(ipAddress, ip, 16);
+	*ipAddress = Ip(inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+	printf("[+] attackerIp   : %s\n", std::string(*ipAddress).c_str());
 
 	close(sockfd);
-	return 0;
+	return true;
 }
+
+void getHostInfo(const char *interfaceName, Ip *ipAddress, Mac *macAddress)
+{	
+	printf("\n----------------------------------------\n");
+	printf("[*] get host info..");
+	printf("\n----------------------------------------\n");
+	if(!getHostIpAddress(interfaceName, ipAddress))
+		printf("[*] failed to get Host Ip\n");
+	if(!getHostMacAddress(interfaceName, macAddress))
+		printf("[*] failed to get Host Mac\n");
+}
+
