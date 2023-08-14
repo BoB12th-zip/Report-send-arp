@@ -14,7 +14,7 @@ void sendArp(pcap_t *handle, EthArpPacket pkt)
 	}
 }
 
-void sendArpThread(pcap_t *handle, EthArpPacket pkt, int repeat)
+void continueSendArp(pcap_t *handle, EthArpPacket pkt, int repeat)
 {
 	while(true)
 	{
@@ -27,7 +27,7 @@ Mac getMac(pcap_t* handle, Ip attackerIp, Mac attackerMac, Ip ip)
 {
 	EthArpPacket pkt = EthArpPacket(ArpHdr::Request, Mac::broadcastMac(), attackerMac, EthHdr::Arp, ArpHdr::ETHER, EthHdr::Ip4, Mac::SIZE, Ip::SIZE, attackerMac, attackerIp, Mac::nullMac(), ip);
 	
-	std::thread thread1(sendArpThread, handle, pkt, 3);
+	std::thread sendArpThread(continueSendArp, handle, pkt, 3);
 	
 	while (true)
 		{
@@ -43,7 +43,7 @@ Mac getMac(pcap_t* handle, Ip attackerIp, Mac attackerMac, Ip ip)
 			if (ntohs(reply->eth_.type_) == EthHdr::Arp && ntohs(reply->arp_.op_) == ArpHdr::Reply &&
 				reply->arp_.sip_ == Ip(htonl(ip)) && reply->arp_.tip_ == Ip(htonl(attackerIp)))
 			{
-				thread1.detach();
+				sendArpThread.detach();
 				return reply->arp_.smac_;
 			}
 		}
