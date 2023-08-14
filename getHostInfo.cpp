@@ -1,4 +1,4 @@
-#include "getAddress.h"
+#include "getHostInfo.h"
 
 bool getHostMacAddress(const char *interfaceName, Mac* macAddress)
 {
