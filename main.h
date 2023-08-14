@@ -1,6 +1,6 @@
 #include <cstdio>
 #include <pcap.h>
-#include "getAddress.cpp"
+#include "getHostInfo.h"
 #include "ethhdr.h"
 #include "arphdr.h"
 #include <unistd.h>
